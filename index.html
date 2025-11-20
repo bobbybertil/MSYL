@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maharashtra Youth League Tournament</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 20px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            margin-bottom: 15px; 
+        }
+        .header h1 { 
+            color: #1e40af; 
+            font-size: 1.5em; 
+            margin-bottom: 10px; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .subtitle { color: #64748b; font-size: 0.9em; margin-top: 5px; }
+        .alert {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .alert-info { background: #dbeafe; border: 2px solid #3b82f6; color: #1e40af; }
+        .alert-success { background: #d1fae5; border: 2px solid #10b981; color: #065f46; }
+        .alert-error { background: #fee2e2; border: 2px solid #ef4444; color: #991b1b; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 15px; }
+        .tab-btn { 
+            flex: 1; 
+            padding: 12px 15px; 
+            background: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        .tab-btn:hover { background: #f1f5f9; }
+        .tab-btn.active { background: #3b82f6; color: white; }
+        .content { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 20px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+        }
+        .match-card { 
+            border: 2px solid #e2e8f0; 
+            border-radius: 8px; 
+            padding: 15px; 
+            margin-bottom: 12px;
+            transition: all 0.3s;
+        }
+        .match-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2);
+        }
+        .match-completed { background: #f0fdf4; border-color: #86efac; }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .save-btn { 
+            width: 100%; 
+            padding: 12px; 
+            background: #10b981; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            margin-top: 10px;
+        }
+        .hidden { display: none; }
+        .loading { text-align: center; padding: 30px; color: #64748b; }
+        .filter-section { margin-bottom: 15px; }
+        .filter-section select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .data-section {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 2px solid #e2e8f0;
+        }
+        .data-section h3 {
+            margin-bottom: 15px;
+            color: #1e293b;
+            font-size: 16px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 5px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        @media (min-width: 768px) {
+            .header h1 { font-size: 2em; }
+            .subtitle { margin-left: 50px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="alertContainer"></div>
+        
+        <div class="header">
+            <h1>🏆 Maharashtra Youth League</h1>
+            <p class="subtitle">Junior Boys Championship 2025-26</p>
+            <p class="subtitle">💾 Works 100% offline - No server needed!</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('schedule')">
+                <span>📅</span> <span>Schedule</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('standings')">
+                <span>📊</span> <span>Table</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('data')">
+                <span>⚙️</span> <span>Data</span>
+            </button>
+        </div>
+
+        <div class="content">
+            <!-- SCHEDULE TAB -->
+            <div id="scheduleTab">
+                <div class="filter-section">
+                    <select id="dateFilter" onchange="filterMatches()">
+                        <option value="all">All Dates</option>
+                    </select>
+                </div>
+                <div id="matchesList">
+                    <div class="loading">Loading matches...</div>
+                </div>
+            </div>
+
+            <!-- STANDINGS TAB -->
+            <div id="standingsTab" class="hidden">
+                <h2 style="color: #1e40af; margin-bottom: 15px;">League Standings</h2>
+                <div id="statsCards"></div>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                        <thead>
+                            <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                                <th style="padding: 12px; text-align: left;">#</th>
+                                <th style="padding: 12px; text-align: left;">Team</th>
+                                <th style="padding: 12px; text-align: center;">P</th>
+                                <th style="padding: 12px; text-align: center;">W</th>
+                                <th style="padding: 12px; text-align: center;">D</th>
+                                <th style="padding: 12px; text-align: center;">L</th>
+                                <th style="padding: 12px; text-align: center;">GF</th>
+                                <th style="padding: 12px; text-align: center;">GA</th>
+                                <th style="padding: 12px; text-align: center;">GD</th>
+                                <th style="padding: 12px; text-align: center;">Pts</th>
+                            </tr>
+                        </thead>
+                        <tbody id="standingsBody">
+                            <tr><td colspan="10" class="loading">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DATA TAB -->
+            <div id="dataTab" class="hidden">
+                <h2 style="color: #1e40af; margin-bottom: 10px;">Data Management</h2>
+                <p style="color: #64748b; margin-bottom: 20px; font-size: 14px;">
+                    All data is stored in your browser. You can export/import JSON files to backup or share.
+                </p>
+                
+                <!-- Statistics -->
+                <div class="data-section">
+                    <h3>📊 Statistics</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div id="totalCount" class="stat-value">0</div>
+                            <div class="stat-label">Total Matches</div>
+                        </div>
+                        <div class="stat-card">
+                            <div id="completedCount" class="stat-value" style="color: #10b981;">0</div>
+                            <div class="stat-label">Completed</div>
+                        </div>
+                        <div class="stat-card">
+                            <div id="pendingCount" class="stat-value" style="color: #f59e0b;">0</div>
+                            <div class="stat-label">Pending</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Operations -->
+                <div class="data-section" style="background: #fef3c7; border-color: #fbbf24;">
+                    <h3 style="color: #92400e;">💾 Save & Load</h3>
+                    <p style="color: #78350f; font-size: 13px; margin-bottom: 10px;">
+                        Export your data to a JSON file or import from a previous save
+                    </p>
+                    <div class="btn-group">
+                        <button onclick="exportToJSON()" class="btn btn-success">
+                            📥 Export to JSON File
+                        </button>
+                        <label class="btn btn-primary" style="margin: 0; cursor: pointer;">
+                            📤 Import from JSON File
+                            <input type="file" id="importFile" accept=".json" onchange="importFromJSON(event)" style="display: none;">
+                        </label>
+                        <button onclick="openJSONFile()" class="btn btn-primary">
+                            📂 Open & Auto-Save JSON File
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Browser Storage -->
+                <div class="data-section" style="background: #dbeafe; border-color: #3b82f6;">
+                    <h3 style="color: #1e40af;">🌐 Browser Storage</h3>
+                    <p style="color: #1e3a8a; font-size: 13px; margin-bottom: 10px;">
+                        Data is automatically saved in your browser (localStorage)
+                    </p>
+                    <div class="btn-group">
+                        <button onclick="saveToLocalStorage()" class="btn btn-primary">
+                            💾 Save to Browser
+                        </button>
+                        <button onclick="loadFromLocalStorage()" class="btn btn-primary">
+                            📥 Load from Browser
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="data-section" style="background: #fecaca; border-color: #ef4444;">
+                    <h3 style="color: #991b1b;">⚠️ Danger Zone</h3>
+                    <p style="color: #7f1d1d; font-size: 13px; margin-bottom: 10px;">
+                        These actions cannot be undone!
+                    </p>
+                    <div class="btn-group">
+                        <button onclick="clearAllResults()" class="btn btn-warning">
+                            🗑️ Clear All Results
+                        </button>
+                        <button onclick="resetToDefault()" class="btn btn-danger">
+                            🔄 Reset Everything
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Completed Matches -->
+                <div class="data-section">
+                    <h3>✏️ Edit Completed Matches</h3>
+                    <div id="completedList">
+                        <div class="loading">No completed matches yet</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allMatches = [];
+        let fileHandle = null; // For File System Access API
+
+        // Initial match data
+        const defaultMatches = [
+            {id: 1, teamA: "Mathew FA", teamB: "S3 Soccer Academy", matchDate: "18/11/2025", matchTime: "8:00 AM", ground: 1, status: "SCHEDULED"},
+            {id: 2, teamA: "Sportians Nagpur FC", teamB: "Community Football Club India", matchDate: "18/11/2025", matchTime: "8:30 AM", ground: 2, status: "SCHEDULED"},
+            {id: 3, teamA: "Vasai Virar UFA", teamB: "Adrenaline Sports New Era", matchDate: "18/11/2025", matchTime: "10:00 AM", ground: 1, status: "SCHEDULED"},
+            {id: 4, teamA: "Thane City FC", teamB: "Buldana Football Academy", matchDate: "18/11/2025", matchTime: "10:30 AM", ground: 2, status: "SCHEDULED"},
+            {id: 5, teamA: "Sporting Club De Thane", teamB: "Dervan FC", matchDate: "18/11/2025", matchTime: "1:30 PM", ground: 1, status: "SCHEDULED"}
+            // Add all 105 matches here... (truncated for brevity)
+        ];
+
+        // ===== ALERTS =====
+        function showAlert(message, type = 'info') {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            container.appendChild(alert);
+            setTimeout(() => alert.remove(), 4000);
+        }
+
+        // ===== LOCAL STORAGE =====
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('tournamentData', JSON.stringify(allMatches));
+                showAlert('✓ Data saved to browser!', 'success');
+            } catch (error) {
+                showAlert('Error saving to browser: ' + error.message, 'error');
+            }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const data = localStorage.getItem('tournamentData');
+                if (data) {
+                    allMatches = JSON.parse(data);
+                    showAlert('✓ Data loaded from browser!', 'success');
+                    refreshUI();
+                } else {
+                    showAlert('No data found in browser storage', 'info');
+                }
+            } catch (error) {
+                showAlert('Error loading from browser: ' + error.message, 'error');
+            }
+        }
+
+        // ===== FILE SYSTEM ACCESS API =====
+        async function openJSONFile() {
+            try {
+                // Check if File System Access API is supported
+                if (!('showOpenFilePicker' in window)) {
+                    showAlert('Your browser doesn\'t support this feature. Use Export/Import instead.', 'error');
+                    return;
+                }
+
+                // Open file picker
+                [fileHandle] = await window.showOpenFilePicker({
+                    types: [{
+                        description: 'JSON Files',
+                        accept: { 'application/json': ['.json'] }
+                    }],
+                    multiple: false
+                });
+
+                // Read the file
+                const file = await fileHandle.getFile();
+                const text = await file.readText();
+                allMatches = JSON.parse(text);
+                
+                showAlert('✓ File opened! Changes will auto-save to: ' + file.name, 'success');
+                refreshUI();
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    showAlert('Error opening file: ' + error.message, 'error');
+                }
+            }
+        }
+
+        async function autoSaveToFile() {
+            if (!fileHandle) return;
+
+            try {
+                const writable = await fileHandle.createWritable();
+                await writable.write(JSON.stringify(allMatches, null, 2));
+                await writable.close();
+                console.log('✓ Auto-saved to file');
+            } catch (error) {
+                console.error('Auto-save failed:', error);
+            }
+        }
+
+        // ===== EXPORT/IMPORT =====
+        function exportToJSON() {
+            try {
+                const dataStr = JSON.stringify(allMatches, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `tournament-data-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showAlert('✓ JSON file downloaded!', 'success');
+            } catch (error) {
+                showAlert('Error exporting: ' + error.message, 'error');
+            }
+        }
+
+        function importFromJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (!Array.isArray(imported)) {
+                        throw new Error('Invalid file format');
+                    }
+                    allMatches = imported;
+                    saveToLocalStorage();
+                    showAlert('✓ Data imported successfully!', 'success');
+                    refreshUI();
+                } catch (error) {
+                    showAlert('Error importing: ' + error.message, 'error');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // ===== MATCH OPERATIONS =====
+        function saveResult(matchId) {
+            const scoreA = parseInt(document.getElementById(`scoreA-${matchId}`).value);
+            const scoreB = parseInt(document.getElementById(`scoreB-${matchId}`).value);
+
+            if (isNaN(scoreA) || isNaN(scoreB) || scoreA < 0 || scoreB < 0) {
+                showAlert('Please enter valid scores', 'error');
+                return;
+            }
+
+            allMatches = allMatches.map(m => {
+                if (m.id === matchId) {
+                    return { ...m, scoreA, scoreB, status: 'COMPLETED' };
+                }
+                return m;
+            });
+
+            saveToLocalStorage();
+            autoSaveToFile();
+            showAlert('✓ Result saved!', 'success');
+            filterMatches();
+        }
+
+        function editMatch(matchId) {
+            const match = allMatches.find(m => m.id === matchId);
+            if (!match) return;
+
+            const newScoreA = prompt(`Enter score for ${match.teamA}:`, match.scoreA);
+            if (newScoreA === null) return;
+
+            const newScoreB = prompt(`Enter score for ${match.teamB}:`, match.scoreB);
+            if (newScoreB === null) return;
+
+            const scoreA = parseInt(newScoreA);
+            const scoreB = parseInt(newScoreB);
+
+            if (isNaN(scoreA) || isNaN(scoreB) || scoreA < 0 || scoreB < 0) {
+                showAlert('Invalid scores!', 'error');
+                return;
+            }
+
+            allMatches = allMatches.map(m => {
+                if (m.id === matchId) {
+                    return { ...m, scoreA, scoreB, status: 'COMPLETED' };
+                }
+                return m;
+            });
+
+            saveToLocalStorage();
+            autoSaveToFile();
+            showAlert('✓ Match updated!', 'success');
+            displayDataManagement();
+        }
+
+        function deleteResult(matchId) {
+            if (!confirm('Delete this result?')) return;
+
+            allMatches = allMatches.map(m => {
+                if (m.id === matchId) {
+                    const { scoreA, scoreB, ...rest } = m;
+                    return { ...rest, status: 'SCHEDULED' };
+                }
+                return m;
+            });
+
+            saveToLocalStorage();
+            autoSaveToFile();
+            showAlert('✓ Result deleted!', 'success');
+            displayDataManagement();
+        }
+
+        function clearAllResults() {
+            if (!confirm('Clear all match results?')) return;
+
+            allMatches = allMatches.map(m => {
+                const { scoreA, scoreB, ...rest } = m;
+                return { ...rest, status: 'SCHEDULED' };
+            });
+
+            saveToLocalStorage();
+            autoSaveToFile();
+            showAlert('✓ All results cleared!', 'success');
+            displayDataManagement();
+        }
+
+        function resetToDefault() {
+            if (!confirm('⚠️ Reset everything to default?')) return;
+            if (!confirm('This CANNOT be undone!')) return;
+
+            allMatches = [...defaultMatches];
+            fileHandle = null;
+            saveToLocalStorage();
+            showAlert('✓ Reset complete!', 'success');
+            refreshUI();
+        }
+
+        // ===== DISPLAY FUNCTIONS =====
+        function displayMatches(matches) {
+            const container = document.getElementById('matchesList');
+            if (matches.length === 0) {
+                container.innerHTML = '<p class="loading">No matches found</p>';
+                return;
+            }
+
+            container.innerHTML = matches.map(match => {
+                const isCompleted = match.status === 'COMPLETED';
+                return `
+                    <div class="match-card ${isCompleted ? 'match-completed' : ''}">
+                        <div style="color: #64748b; font-size: 12px; margin-bottom: 10px;">
+                            📅 ${match.matchDate} | ⏰ ${match.matchTime} | 🏟️ Ground ${match.ground}
+                        </div>
+                        ${isCompleted ? `
+                            <div style="text-align: center;">
+                                <div style="font-weight: 600; margin: 8px 0;">${match.teamA}</div>
+                                <div style="font-size: 28px; font-weight: bold; color: #10b981; margin: 10px 0;">
+                                    ${match.scoreA} - ${match.scoreB}
+                                </div>
+                                <div style="font-weight: 600; margin: 8px 0;">${match.teamB}</div>
+                                <div style="color: #10b981; font-weight: 600; margin-top: 10px;">✓ Completed</div>
+                            </div>
+                        ` : `
+                            <div style="margin: 15px 0;">
+                                <div style="font-weight: 600; margin-bottom: 5px;">${match.teamA}</div>
+                                <input type="number" id="scoreA-${match.id}" min="0" placeholder="0" 
+                                       style="width: 80px; padding: 8px; border: 2px solid #e2e8f0; border-radius: 6px; margin-bottom: 10px;">
+                                
+                                <div style="font-weight: 600; margin-bottom: 5px;">${match.teamB}</div>
+                                <input type="number" id="scoreB-${match.id}" min="0" placeholder="0" 
+                                       style="width: 80px; padding: 8px; border: 2px solid #e2e8f0; border-radius: 6px;">
+                            </div>
+                            <button onclick="saveResult(${match.id})" class="save-btn">💾 Save Result</button>
+                        `}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function displayDataManagement() {
+            const total = allMatches.length;
+            const completed = allMatches.filter(m => m.status === 'COMPLETED').length;
+            
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('pendingCount').textContent = total - completed;
+
+            const completedMatches = allMatches.filter(m => m.status === 'COMPLETED');
+            const container = document.getElementById('completedList');
+            
+            if (completedMatches.length === 0) {
+                container.innerHTML = '<div class="loading">No completed matches yet</div>';
+                return;
+            }
+
+            container.innerHTML = completedMatches.map(m => `
+                <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 8px; border: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <div style="font-size: 12px; color: #64748b;">${m.matchDate}</div>
+                        <div style="font-weight: 600;">${m.teamA} ${m.scoreA} - ${m.scoreB} ${m.teamB}</div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="editMatch(${m.id})" class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;">✏️ Edit</button>
+                        <button onclick="deleteResult(${m.id})" class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterMatches() {
+            const selectedDate = document.getElementById('dateFilter').value;
+            const filtered = selectedDate === 'all' 
+                ? allMatches 
+                : allMatches.filter(m => m.matchDate === selectedDate);
+            displayMatches(filtered);
+        }
+
+        function populateDateFilter() {
+            const dates = [...new Set(allMatches.map(m => m.matchDate))];
+            const sortedDates = dates.sort((a, b) => {
+                const [dayA, monthA, yearA] = a.split('/').map(Number);
+                const [dayB, monthB, yearB] = b.split('/').map(Number);
+                return new Date(yearA, monthA - 1, dayA) - new Date(yearB, monthB - 1, dayB);
+            });
+            
+            const select = document.getElementById('dateFilter');
+            select.innerHTML = '<option value="all">All Dates (' + allMatches.length + ' matches)</option>';
+            sortedDates.forEach(date => {
+                const count = allMatches.filter(m => m.matchDate === date).length;
+                select.innerHTML += `<option value="${date}">${date} (${count} matches)</option>`;
+            });
+        }
+
+        function refreshUI() {
+            populateDateFilter();
+            filterMatches();
+            if (!document.getElementById('dataTab').classList.contains('hidden')) {
+                displayDataManagement();
+            }
+        }
+
+        function calculateStandings() {
+            const teams = {};
+            
+            allMatches.filter(m => m.status === 'COMPLETED').forEach(match => {
+                if (!teams[match.teamA]) {
+                    teams[match.teamA] = {name: match.teamA, played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0, points: 0};
+                }
+                if (!teams[match.teamB]) {
+                    teams[match.teamB] = {name: match.teamB, played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0, points: 0};
+                }
+
+                const scoreA = match.scoreA;
+                const scoreB = match.scoreB;
+
+                teams[match.teamA].played++;
+                teams[match.teamB].played++;
+                teams[match.teamA].gf += scoreA;
+                teams[match.teamA].ga += scoreB;
+                teams[match.teamB].gf += scoreB;
+                teams[match.teamB].ga += scoreA;
+
+                if (scoreA > scoreB) {
+                    teams[match.teamA].won++;
+                    teams[match.teamA].points += 3;
+                    teams[match.teamB].lost++;
+                } else if (scoreB > scoreA) {
+                    teams[match.teamB].won++;
+                    teams[match.teamB].points += 3;
+                    teams[match.teamA].lost++;
+                } else {
+                    teams[match.teamA].drawn++;
+                    teams[match.teamB].drawn++;
+                    teams[match.teamA].points += 1;
+                    teams[match.teamB].points += 1;
+                }
+
+                teams[match.teamA].gd = teams[match.teamA].gf - teams[match.teamA].ga;
+                teams[match.teamB].gd = teams[match.teamB].gf - teams[match.teamB].ga;
+            });
+
+            return Object.values(teams).sort((a, b) => {
+                if (b.points !== a.points) return b.points - a.points;
+                if (b.gd !== a.gd) return b.gd - a.gd;
+                return b.gf - a.gf;
+            });
+        }
+
+        function displayStandings() {
+            const standings = calculateStandings();
+            const tbody = document.getElementById('standingsBody');
+            
+            if (standings.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" class="loading">No results entered yet. Go to Schedule to add match results!</td></tr>';
+                document.getElementById('statsCards').innerHTML = '';
+                return;
+            }
+
+            // Display summary stats
+            const totalMatches = allMatches.filter(m => m.status === 'COMPLETED').length;
+            const totalGoals = standings.reduce((sum, team) => sum + team.gf, 0);
+            const avgGoals = totalMatches > 0 ? (totalGoals / totalMatches).toFixed(1) : 0;
+            
+            document.getElementById('statsCards').innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 20px;">
+                    <div style="background: #f8fafc; padding: 15px; border-radius: 6px; border: 2px solid #e2e8f0; text-align: center;">
+                        <div style="font-size: 24px; font-weight: bold; color: #3b82f6;">${standings.length}</div>
+                        <div style="font-size: 12px; color: #64748b; margin-top: 3px;">Teams</div>
+                    </div>
+                    <div style="background: #f8fafc; padding: 15px; border-radius: 6px; border: 2px solid #e2e8f0; text-align: center;">
+                        <div style="font-size: 24px; font-weight: bold; color: #3b82f6;">${totalMatches}</div>
+                        <div style="font-size: 12px; color: #64748b; margin-top: 3px;">Matches Played</div>
+                    </div>
+                    <div style="background: #f8fafc; padding: 15px; border-radius: 6px; border: 2px solid #e2e8f0; text-align: center;">
+                        <div style="font-size: 24px; font-weight: bold; color: #3b82f6;">${totalGoals}</div>
+                        <div style="font-size: 12px; color: #64748b; margin-top: 3px;">Total Goals</div>
+                    </div>
+                    <div style="background: #f8fafc; padding: 15px; border-radius: 6px; border: 2px solid #e2e8f0; text-align: center;">
+                        <div style="font-size: 24px; font-weight: bold; color: #3b82f6;">${avgGoals}</div>
+                        <div style="font-size: 12px; color: #64748b; margin-top: 3px;">Avg Goals/Match</div>
+                    </div>
+                </div>
+            `;
+
+            tbody.innerHTML = standings.map((team, index) => `
+                <tr style="${index < 3 ? 'background: #fef3c7;' : ''} border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 12px; font-weight: bold; color: #3b82f6;">${index + 1}</td>
+                    <td style="padding: 12px;"><strong>${team.name}</strong></td>
+                    <td style="padding: 12px; text-align: center;">${team.played}</td>
+                    <td style="padding: 12px; text-align: center;">${team.won}</td>
+                    <td style="padding: 12px; text-align: center;">${team.drawn}</td>
+                    <td style="padding: 12px; text-align: center;">${team.lost}</td>
+                    <td style="padding: 12px; text-align: center;">${team.gf}</td>
+                    <td style="padding: 12px; text-align: center;">${team.ga}</td>
+                    <td style="padding: 12px; text-align: center; font-weight: bold; color: ${team.gd >= 0 ? '#10b981' : '#ef4444'}">${team.gd > 0 ? '+' : ''}${team.gd}</td>
+                    <td style="padding: 12px; text-align: center; font-weight: bold; font-size: 16px; color: #3b82f6;">${team.points}</td>
+                </tr>
+            `).join('');
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.tab-btn').classList.add('active');
+
+            document.getElementById('scheduleTab').classList.add('hidden');
+            document.getElementById('standingsTab').classList.add('hidden');
+            document.getElementById('dataTab').classList.add('hidden');
+
+            if (tab === 'schedule') {
+                document.getElementById('scheduleTab').classList.remove('hidden');
+                refreshUI();
+            } else if (tab === 'standings') {
+                document.getElementById('standingsTab').classList.remove('hidden');
+                displayStandings();
+            } else if (tab === 'data') {
+                document.getElementById('dataTab').classList.remove('hidden');
+                displayDataManagement();
+            }
+        }
+
+        // Initialize
+        window.onload = () => {
+            // Try to load from localStorage first
+            const saved = localStorage.getItem('tournamentData');
+            allMatches = saved ? JSON.parse(saved) : [...defaultMatches];
+            refreshUI();
+            showAlert('💡 Tip: Use "Open & Auto-Save" to work with a JSON file!', 'info');
+        };
+    </script>
+</body>
+</html>
